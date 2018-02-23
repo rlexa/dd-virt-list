@@ -1,8 +1,9 @@
 [Angular]: https://angular.io/ "Angular UI Framework"
+[Source]: https://github.com/rlexa/dd-virt-list "Source Code"
 
 # DdVirtList
 
-DdVirtList is an [Angular] component for showing a virtual list for both large data arrays and lazy loaded chunks.
+DdVirtList ([Source]) is an [Angular] component for showing a virtual list for both large data arrays and lazy loaded chunks.
 
 ## Info
 
