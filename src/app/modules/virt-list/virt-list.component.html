@@ -1,0 +1,10 @@
+<div #scroller [ngStyle]="{'max-height': vlHeight, 'overflow-y': 'scroll', 'will-change': 'scroll-position'}">
+  <div #container [ngStyle]="{
+    'display': 'flex', 'flex-direction': 'column', 'position': 'relative',
+    'overflow': 'hidden',
+    'min-height': containerHeight, 'height': containerHeight, 'max-height': containerHeight
+  }">
+    <div [ngStyle]="{'max-height': '0px', 'padding-top': paddingTop}"></div>
+    <ng-content></ng-content>
+  </div>
+</div>
