@@ -6,4 +6,4 @@
 
 ### Performance
 
-* **scrolling:** added `will-change: transform` to scroll container
+* **scrolling:** added performance hints to scroll container and content container
