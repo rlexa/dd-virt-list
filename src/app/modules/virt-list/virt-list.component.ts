@@ -79,6 +79,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.vlCount = this.curNonLazyData.length;
       this.curCache = null;
       this.curShown = null;
+      this.calcBatch();
+      this.calcPage();
       this.triggerCalcBatch.next();
     }
   }
@@ -121,6 +123,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
         if (slice && this.curLazyRequest && this.curLazyRequest.from === slice.from && this.curLazyRequest.to === slice.to) {
           this.curCache = { ...this.curLazyRequest, items: slice.items || [] };
           this.curLazyRequest = null;
+          this.calcPage();
           this.triggerCalcBatch.next();
         }
       });
@@ -181,38 +184,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    this.triggerCalcBatch.takeUntil(this.done).debounceTime(0).subscribe(() => {
-      this.curBatchIndex = this.curItemHeight ?
-        Math.round(this.vcScroller.nativeElement.scrollTop / (this.curBatchSize * this.curItemHeight)) : 0;
-      this.triggerCalcPage.next();
-    });
-
-    this.triggerCalcPage.takeUntil(this.done).debounceTime(0).subscribe(() => {
-      let [from = 0, to = 0] = getFromTo(this.curBatchIndex, this.curBatchSize, 2, 2);
-      if (!this.curShown || this.curShown.from !== from || this.curShown.to !== to) {
-        if (to >= from) {
-          const [fromMin = 0, toMin = 0] = getFromTo(this.curBatchIndex, this.curBatchSize, 1, 1);
-          if (this.curCache && this.curCache.from <= fromMin && this.curCache.to >= toMin) {
-            from = Math.max(from, this.curCache.from);
-            to = Math.min(to, this.curCache.to);
-            this.triggerSetData.next({ from, to, items: this.curCache.items.slice(from - this.curCache.from, to - this.curCache.from) });
-          } else {
-            if (this.subsLazyStream) {
-              if (!this.curLazyRequest || this.curLazyRequest.from > from || this.curLazyRequest.to < to) {
-                this.curLazyRequest = { from, to, items: null };
-                this.vlLazyRequest.next({ ...this.curLazyRequest });
-              }
-            } else {
-              this.curCache = { from, to, items: this.curNonLazyData.slice(from, to) };
-              this.triggerSetData.next({ ...this.curCache });
-            }
-          }
-        } else {
-          this.curCache = null;
-          this.triggerSetData.next(this.EMPTY_SLICE);
-        }
-      }
-    });
+    this.triggerCalcBatch.takeUntil(this.done).debounceTime(0).subscribe(() => this.calcBatch());
+    this.triggerCalcPage.takeUntil(this.done).debounceTime(0).subscribe(() => this.calcPage());
 
     this.triggerSetData.takeUntil(this.done).subscribe(slice => {
       this.curShown = slice;
@@ -231,6 +204,39 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.triggerCalcBatch.next();
+  }
+
+  private calcBatch() {
+    this.curBatchIndex = this.curItemHeight ?
+      Math.round(this.vcScroller.nativeElement.scrollTop / (this.curBatchSize * this.curItemHeight)) : 0;
+    this.triggerCalcPage.next();
+  }
+
+  private calcPage() {
+    let [from = 0, to = 0] = getFromTo(this.curBatchIndex, this.curBatchSize, 2, 2);
+    if (!this.curShown || this.curShown.from !== from || this.curShown.to !== to) {
+      if (to >= from) {
+        const [fromMin = 0, toMin = 0] = getFromTo(this.curBatchIndex, this.curBatchSize, 1, 1);
+        if (this.curCache && this.curCache.from <= fromMin && this.curCache.to >= toMin) {
+          from = Math.max(from, this.curCache.from);
+          to = Math.min(to, this.curCache.to);
+          this.triggerSetData.next({ from, to, items: this.curCache.items.slice(from - this.curCache.from, to - this.curCache.from) });
+        } else {
+          if (this.subsLazyStream) {
+            if (!this.curLazyRequest || this.curLazyRequest.from > from || this.curLazyRequest.to < to) {
+              this.curLazyRequest = { from, to, items: null };
+              this.vlLazyRequest.next({ ...this.curLazyRequest });
+            }
+          } else {
+            this.curCache = { from, to, items: this.curNonLazyData.slice(from, to) };
+            this.triggerSetData.next({ ...this.curCache });
+          }
+        }
+      } else {
+        this.curCache = null;
+        this.triggerSetData.next(this.EMPTY_SLICE);
+      }
+    }
   }
 
 }
