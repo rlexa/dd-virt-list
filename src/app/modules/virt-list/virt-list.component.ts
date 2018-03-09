@@ -1,6 +1,6 @@
 import {
   Component, Input, Output, EventEmitter, OnInit, OnDestroy, AfterViewInit,
-  ViewChild, ElementRef, ViewContainerRef, NgZone
+  ViewChild, ElementRef, ViewContainerRef, HostListener, NgZone
 } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
@@ -153,6 +153,10 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   private subsLazyStream: Subscription = null;
   private done = new DoneSubject();
 
+  @HostListener('window:resize') onWindowResize() {
+    this.triggerCalcItemHeight.next();
+  }
+
   constructor(private refSelf: ViewContainerRef, private ngZone: NgZone) { }
 
   ngOnDestroy() {
@@ -165,7 +169,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-    this.triggerCalcItemHeight.takeUntil(this.done).debounceTime(0).subscribe(() => {
+    this.triggerCalcItemHeight.takeUntil(this.done).debounceTime(100).subscribe(() => {
       if (this.vcContainer.nativeElement.children.length > 1) {
         const newHeight = calcElementHeight(this.vcContainer.nativeElement.children.item(1));
         if (newHeight !== this.curItemHeight) {
