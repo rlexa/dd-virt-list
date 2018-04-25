@@ -62,7 +62,10 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('scroller') private vcScroller: ElementRef;
   @ViewChild('container') private vcContainer: ElementRef;
 
-  @Input() vlHeight = 'auto';
+  @Input() set vlHeight(val: string) {
+    this.maxHeight = val || 'auto';
+    this.triggerDetection.next();
+  }
 
   @Input() set vlBatchSize(value: number) {
     if (value >= MIN_BATCH_SIZE && value !== this.curBatchSize) {
@@ -132,6 +135,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   items: any[] = [];
+  maxHeight = 'auto';
   paddingTop = toPixels(0);
   containerHeight = toPixels(0);
 
@@ -182,7 +186,11 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
-    this.triggerDetection.takeUntil(this.done).debounceTime(0).subscribe(() => this.changeDetectorRef.detectChanges());
+    this.triggerDetection.takeUntil(this.done).debounceTime(0).subscribe(() => {
+      if (!this.changeDetectorRef['destroyed']) {
+        this.changeDetectorRef.detectChanges();
+      }
+    });
 
     this.triggerCalcItemHeight.takeUntil(this.done).debounceTime(100).subscribe(() => {
       if (this.vcContainer.nativeElement.children.length > 1) {

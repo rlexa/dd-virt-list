@@ -1,3 +1,15 @@
+# 0.9.23
+
+### Fixed
+
+* **change detection:** prevent manual change detection when destroyed
+
+# 0.9.21
+
+### Fixed
+
+* **vlHeight:** manual change detection on vlHeight change
+
 # 0.9.2
 
 ### Performance

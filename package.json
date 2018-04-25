@@ -5,7 +5,7 @@
     "npm publish dist": "publish to npm"
   },
   "name": "dd-virt-list",
-  "version": "0.9.2",
+  "version": "0.9.23",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
