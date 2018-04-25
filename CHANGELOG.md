@@ -1,3 +1,9 @@
+# 0.9.2
+
+### Performance
+
+* **manual change detection:** detached from angular change detection
+
 # 0.9.19
 
 ### Fixed
