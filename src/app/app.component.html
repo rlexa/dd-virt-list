@@ -2,18 +2,19 @@
 
   <div [ngStyle]="{'display': 'flex', 'flex-direction': 'column'}">
     <button (click)="vlTrigger.next()">RELOAD</button>
-    <button (click)="vlData = toRange(vlData.length === VL_SIZE ? VL_SIZE/2 : VL_SIZE)">RESIZE</button>
+    <button (click)="createDate(vlData.length === VL_SIZE ? VL_SIZE/2 : VL_SIZE)">RESIZE</button>
+    <label>{{ vlData.length }}</label>
   </div>
 
   <div [ngStyle]="{'width': '100px', 'margin': '15px'}">
     <dd-virt-list #vlSimple vlHeight="300px" [vlTrigger]="vlTrigger" [vlData]="vlData">
-      <label *ngFor="let ii of vlSimple.items" [style.font-family]="'monospace'">{{ ii }}</label>
+      <label *ngFor="let ii of vlSimple.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
     </dd-virt-list>
   </div>
 
   <div [ngStyle]="{'width': '100px', 'margin': '15px'}">
     <dd-virt-list #vlLazy vlHeight="300px" [vlTrigger]="vlTrigger" [vlCount]="vlData.length" [vlLazyStream]="vlStream" (vlLazyRequest)="onLazyRequestVlist($event)">
-      <label *ngFor="let ii of vlLazy.items" [style.font-family]="'monospace'">{{ ii }}</label>
+      <label *ngFor="let ii of vlLazy.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
     </dd-virt-list>
   </div>
 

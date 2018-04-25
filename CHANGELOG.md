@@ -1,3 +1,15 @@
+# 0.9.19
+
+### Fixed
+
+* **lazy count change:** sometimes content didn't update on count increase
+
+### Performance
+
+* **scroll debounce time:** changed from 200ms to 100ms for quicker visual response
+* **less relayouting:** caching scrollTop after scroll events to prevent more relayouting
+* **changing test array size:** array resize now done in worker (cleaner perf testing results)
+
 # 0.9.18
 
 ### Fixed

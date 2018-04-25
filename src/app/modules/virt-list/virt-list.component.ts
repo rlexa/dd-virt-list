@@ -7,6 +7,7 @@ import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/takeUntil';
 
 export interface DataSlice {
@@ -57,7 +58,7 @@ function getFromTo(currentBatchIndex: number, batchSize: number, factorCachePre:
 })
 export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  readonly msScrollDebounce = 200;
+  readonly msScrollDebounce = 100;
   readonly EMPTY_SLICE: DataSlice = { from: 0, to: 0, items: [] };
 
   @ViewChild('scroller') private vcScroller: ElementRef;
@@ -89,6 +90,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     count = Math.max(0, count || 0);
     if (count !== this.curCount) {
       this.curCount = count;
+      this.curCache = null;
+      this.curShown = null;
       this.triggerCalcContainerHeight.next();
     }
   }
@@ -144,6 +147,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   private curShown: DataSlice = null;
   private curLazyRequest: DataSlice = null;
 
+  private curScrollTop = 0;
+
   private triggerCalcBatch = new Subject();
   private triggerCalcPage = new Subject();
   private triggerCalcItemHeight = new Subject();
@@ -182,7 +187,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.triggerCalcContainerHeight.takeUntil(this.done).debounceTime(0).subscribe(() => {
       const newHeight = toPixels(this.curItemHeight * this.curCount);
-      if (newHeight !== this.containerHeight) {
+      if (newHeight !== this.containerHeight || !this.curItemHeight && this.curCount) {
         this.containerHeight = newHeight;
         this.triggerCalcBatch.next();
       }
@@ -204,15 +209,18 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       Observable.fromEvent(this.vcScroller.nativeElement, 'scroll')
         .takeUntil(this.done)
         .debounceTime(this.msScrollDebounce)
-        .subscribe((event: Event) => this.ngZone.run(() => this.triggerCalcBatch.next()));
+        .map(() => <number>(this.vcScroller.nativeElement.scrollTop || 0))
+        .subscribe(scrollTop => this.ngZone.run(() => {
+          this.curScrollTop = scrollTop;
+          this.triggerCalcBatch.next();
+        }));
     });
 
     this.triggerCalcBatch.next();
   }
 
   private calcBatch() {
-    this.curBatchIndex = this.curItemHeight ?
-      Math.round(this.vcScroller.nativeElement.scrollTop / (this.curBatchSize * this.curItemHeight)) : 0;
+    this.curBatchIndex = this.curItemHeight ? Math.round(this.curScrollTop / (this.curBatchSize * this.curItemHeight)) : 0;
     this.triggerCalcPage.next();
   }
 
