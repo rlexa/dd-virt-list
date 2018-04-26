@@ -1,3 +1,9 @@
+# 0.9.25
+
+### Changed
+
+* **vlBatchSize:** allow smaller values (min 5 now)
+
 # 0.9.24
 
 ### Changed

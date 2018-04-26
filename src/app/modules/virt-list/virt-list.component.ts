@@ -23,7 +23,7 @@ class DoneSubject extends Subject<void> {
   }
 }
 
-const MIN_BATCH_SIZE = 10;
+const MIN_BATCH_SIZE = 5;
 
 function calcElementHeight(element: HTMLElement) {
   let ret = 0;
@@ -72,7 +72,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   @Input() set vlBatchSize(value: number) {
-    if (value >= MIN_BATCH_SIZE && value !== this.curBatchSize) {
+    value = Math.max(+value, MIN_BATCH_SIZE);
+    if (value !== this.curBatchSize) {
       this.curBatchSize = value;
       this.triggerCalcBatch.next();
     }
