@@ -1,3 +1,9 @@
+# 0.9.24
+
+### Changed
+
+* **change detection:** more reactive internally (less manual change detection)
+
 # 0.9.23
 
 ### Fixed

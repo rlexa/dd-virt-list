@@ -1,4 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef } from '@angular/core';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import { Subscription } from 'rxjs/Subscription';
@@ -52,6 +53,7 @@ function getFromTo(currentBatchIndex: number, batchSize: number, factorCachePre:
 @Component({
   selector: 'dd-virt-list',
   templateUrl: './virt-list.component.html',
+  styleUrls: ['./virt-list.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -63,8 +65,10 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('container') private vcContainer: ElementRef;
 
   @Input() set vlHeight(val: string) {
-    this.maxHeight = val || 'auto';
-    this.triggerDetection.next();
+    val = val || 'auto';
+    if (this.maxHeight$.value !== val) {
+      this.maxHeight$.next(val);
+    }
   }
 
   @Input() set vlBatchSize(value: number) {
@@ -135,9 +139,6 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   items: any[] = [];
-  maxHeight = 'auto';
-  paddingTop = toPixels(0);
-  containerHeight = toPixels(0);
 
   private curBatchSize = MIN_BATCH_SIZE * 3;
   private curBatchIndex = 0;
@@ -156,22 +157,19 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   private triggerCalcItemHeight = new Subject();
   private triggerCalcContainerHeight = new Subject();
   private triggerSetData = new Subject<DataSlice>();
-  private triggerDetection = new Subject();
   private subsDoRequest: Subscription = null;
   private subsLazyStream: Subscription = null;
   private done = new DoneSubject();
-
-  @HostListener('window:resize') onWindowResize() {
-    this.triggerCalcItemHeight.next();
-  }
 
   constructor(
     private readonly refSelf: ViewContainerRef,
     private readonly ngZone: NgZone,
     private readonly changeDetectorRef: ChangeDetectorRef,
-  ) {
-    this.changeDetectorRef.detach();
-  }
+  ) { }
+
+  containerHeight$ = new BehaviorSubject(toPixels(0));
+  maxHeight$ = new BehaviorSubject('auto');
+  paddingTop$ = new BehaviorSubject(toPixels(0));
 
   ngOnDestroy() {
     this.done.done();
@@ -181,17 +179,17 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.triggerCalcItemHeight,
       this.triggerCalcContainerHeight,
       this.triggerSetData,
-      this.triggerDetection,
+      this.containerHeight$,
+      this.maxHeight$,
+      this.paddingTop$,
     ].forEach(ii => ii.complete());
   }
 
-  ngOnInit() {
-    this.triggerDetection.takeUntil(this.done).debounceTime(0).subscribe(() => {
-      if (!this.changeDetectorRef['destroyed']) {
-        this.changeDetectorRef.detectChanges();
-      }
-    });
+  @HostListener('window:resize') onWindowResize() {
+    this.triggerCalcItemHeight.next();
+  }
 
+  ngOnInit() {
     this.triggerCalcItemHeight.takeUntil(this.done).debounceTime(100).subscribe(() => {
       if (this.vcContainer.nativeElement.children.length > 1) {
         const newHeight = calcElementHeight(this.vcContainer.nativeElement.children.item(1));
@@ -203,11 +201,10 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    this.triggerCalcContainerHeight.takeUntil(this.done).debounceTime(0).subscribe(() => {
+    this.triggerCalcContainerHeight.takeUntil(this.done).subscribe(() => {
       const newHeight = toPixels(this.curItemHeight * this.curCount);
-      if (newHeight !== this.containerHeight || !this.curItemHeight && this.curCount) {
-        this.containerHeight = newHeight;
-        this.triggerDetection.next();
+      if (newHeight !== this.containerHeight$.value || !this.curItemHeight && this.curCount) {
+        this.containerHeight$.next(newHeight);
         this.triggerCalcBatch.next();
       }
     });
@@ -218,9 +215,9 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.triggerSetData.takeUntil(this.done).subscribe(slice => {
       this.curShown = slice;
       this.items = this.curShown.items || [];
-      this.paddingTop = toPixels((this.curShown.from || 0) * this.curItemHeight);
-      this.triggerDetection.next();
+      this.paddingTop$.next(toPixels((this.curShown.from || 0) * this.curItemHeight));
       this.triggerCalcItemHeight.next();
+      this.changeDetectorRef.markForCheck();
     });
   }
 

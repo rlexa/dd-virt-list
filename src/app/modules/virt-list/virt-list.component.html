@@ -1,11 +1,7 @@
-<div #scroller [ngStyle]="{'max-height': maxHeight, 'overflow-y': 'scroll', 'will-change': 'scroll-position, transform'}">
-  <div #container [ngStyle]="{
-    'display': 'flex', 'flex-direction': 'column', 'position': 'relative',
-    'overflow': 'hidden',
-    'min-height': containerHeight, 'height': containerHeight, 'max-height': containerHeight,
-    'will-change': 'content'
-  }">
-    <div [ngStyle]="{'max-height': '0px', 'padding-top': paddingTop}"></div>
+<div #scroller class="dd-virt-list-scroller" [style.maxHeight]="maxHeight$ | async">
+  <div *ngIf="containerHeight$ | async as containerHeight" #container class="dd-virt-list-container" [style.minHeight]="containerHeight"
+    [style.height]="containerHeight" [style.maxHeight]="containerHeight">
+    <div class="dd-virt-list-offset" [style.paddingTop]="paddingTop$ | async"></div>
     <ng-content></ng-content>
   </div>
 </div>
