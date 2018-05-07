@@ -1,3 +1,9 @@
+# 0.10.0
+
+### Breaking Changes
+
+* **@angular:** now aligned to @angular framework 6.0.0
+
 # 0.9.25
 
 ### Changed

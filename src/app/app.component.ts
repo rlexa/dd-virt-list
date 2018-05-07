@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { Subject } from 'rxjs/Subject';
+import { Subject } from 'rxjs';
 import { DataSlice } from './modules/virt-list';
 
 const toRange = (count: number, optTo?: number) =>
@@ -14,8 +14,8 @@ export class AppComponent {
 
   readonly VL_SIZE = 1000000;
   vlData = <number[]>[];
-  vlTrigger = new Subject();
-  vlStream = new Subject<DataSlice>();
+  vlTrigger$ = new Subject();
+  vlStream$ = new Subject<DataSlice>();
 
   private worker: Worker = null;
 
@@ -36,7 +36,7 @@ export class AppComponent {
   }
 
   onLazyRequestVlist = (request: DataSlice) => {
-    this.vlStream.next({ ...request, items: this.vlData.slice(request.from, request.to) });
+    this.vlStream$.next({ ...request, items: this.vlData.slice(request.from, request.to) });
   }
 
   trackBy(index: number, ii: number) {

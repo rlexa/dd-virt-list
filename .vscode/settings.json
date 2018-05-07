@@ -1,0 +1,26 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/dist": true,
+        "**/coverage": true,
+        "**/*.bak": true
+    },
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "html.suggest.angular1": false,
+    "beautify.options": {
+        "indent_size": 2,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 1
+    },
+    "[typescript]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    }
+}
