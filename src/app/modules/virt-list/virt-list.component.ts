@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, Subscription, fromEvent } from 'rxjs';
+import { BehaviorSubject, fromEvent, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, takeUntil } from 'rxjs/operators';
 
 export interface DataSlice {
@@ -117,8 +117,12 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     count = Math.max(0, count || 0);
     if (count !== this.curCount) {
       this.curCount = count;
-      this.curCache = null;
-      this.curShown = null;
+      if (!this.subsLazyStream || this.curCache && this.curCache.to - this.curCache.from > this.curCache.items.length) {
+        this.curCache = null;
+      }
+      if (!this.subsLazyStream || this.curShown && this.curShown.to - this.curShown.from > this.curShown.items.length) {
+        this.curShown = null;
+      }
       this.triggerCalcContainerHeight$.next();
     }
   }

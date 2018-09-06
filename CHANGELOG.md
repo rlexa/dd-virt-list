@@ -1,3 +1,9 @@
+# 0.10.1
+
+### Fixed
+
+* **lazy count jittering:** now shouldn't re-request on any count change if cache considered stable enough
+
 # 0.10.0
 
 ### Breaking Changes

@@ -5,7 +5,7 @@
     "npm publish dist": "publish to npm"
   },
   "name": "dd-virt-list",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -17,7 +17,7 @@
     "packagr": "ng-packagr -p ng-package.json"
   },
   "private": false,
-  "dependencies": {
+  "peerDependencies": {
     "@angular/common": "^6.0.0",
     "@angular/compiler": "^6.0.0",
     "@angular/core": "^6.0.0",
