@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { BehaviorSubject, fromEvent, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, fromEvent, interval, Observable, Subject, Subscription } from 'rxjs';
 import { debounceTime, map, takeUntil } from 'rxjs/operators';
 
 export interface DataSlice {
@@ -53,6 +53,10 @@ function getFromTo(currentBatchIndex: number, batchSize: number, factorCachePre:
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
+  constructor(
+    private readonly ngZone: NgZone,
+    private readonly changeDetectorRef: ChangeDetectorRef,
+  ) { }
 
   private readonly done$ = new DoneSubject();
   private readonly triggerCalcBatch$ = new Subject();
@@ -164,11 +168,6 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly changeDetectorRef: ChangeDetectorRef,
-  ) { }
-
   ngOnDestroy() {
     this.done$.done();
     [
@@ -193,8 +192,12 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
         const newHeight = calcElementHeight(this.vcContainer.nativeElement.children.item(1));
         if (newHeight !== this.curItemHeight) {
           this.curItemHeight = newHeight;
-          this.triggerCalcContainerHeight$.next();
-          this.triggerCalcBatch$.next();
+          if (this.curItemHeight === 0) {
+            interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$)).subscribe(_ => this.triggerCalcItemHeight$.next());
+          } else {
+            this.triggerCalcContainerHeight$.next();
+            this.triggerCalcBatch$.next();
+          }
         }
       }
     });
@@ -207,8 +210,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    this.triggerCalcBatch$.pipe(debounceTime(0)).subscribe(() => this.calcBatch());
-    this.triggerCalcPage$.pipe(debounceTime(0)).subscribe(() => this.calcPage());
+    this.triggerCalcBatch$.pipe(debounceTime(0)).subscribe(this.calcBatch);
+    this.triggerCalcPage$.pipe(debounceTime(0)).subscribe(this.calcPage);
 
     this.triggerSetData$.subscribe(slice => {
       this.curShown = slice;
@@ -235,12 +238,12 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.triggerCalcBatch$.next();
   }
 
-  private calcBatch() {
+  private calcBatch = () => {
     this.curBatchIndex = this.curItemHeight ? Math.round(this.curScrollTop / (this.curBatchSize * this.curItemHeight)) : 0;
     this.triggerCalcPage$.next();
   }
 
-  private calcPage() {
+  private calcPage = () => {
     let [from = 0, to = 0] = getFromTo(this.curBatchIndex, this.curBatchSize, 2, 2);
     if (!this.curShown || this.curShown.from !== from || this.curShown.to !== to) {
       if (to >= from) {

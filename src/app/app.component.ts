@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
-import { Subject } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { delay } from 'rxjs/operators';
 import { DataSlice } from './modules/virt-list';
 
 const toRange = (count: number, optTo?: number) =>
@@ -8,17 +9,10 @@ const toRange = (count: number, optTo?: number) =>
 @Component({
   selector: 'dd-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-
-  readonly VL_SIZE = 1000000;
-  vlData = <number[]>[];
-  vlTrigger$ = new Subject();
-  vlStream$ = new Subject<DataSlice>();
-
-  private worker: Worker = null;
-
+export class AppComponent implements OnInit {
   constructor(readonly changeDetectorRef: ChangeDetectorRef) {
     try {
       this.worker = new Worker(URL.createObjectURL(new Blob([`
@@ -28,26 +22,41 @@ export class AppComponent {
       `], { type: 'application/javascript' })));
       this.worker.onmessage = data => {
         this.vlData = data.data;
+        this.vlData$.next(this.vlData);
         changeDetectorRef.detectChanges();
       }
     } catch { }
-
-    this.createDate(this.VL_SIZE);
   }
 
-  onLazyRequestVlist = (request: DataSlice) => {
-    this.vlStream$.next({ ...request, items: this.vlData.slice(request.from, request.to) });
+  private worker: Worker = null;
+
+  readonly VL_SIZE = 1000000;
+
+  vlData = <number[]>[];
+
+  vlData$ = new BehaviorSubject(<number[]>[]);
+  vlDelayedShow$ = new BehaviorSubject(false);
+
+  vlStream$ = new Subject<DataSlice>();
+
+  vlTrigger$ = new Subject();
+
+  ngOnInit() {
+    this.vlData$.pipe(delay(1000)).subscribe(_ => this.vlDelayedShow$.next(!!_ && _.length > 0));
+    this.createData(this.VL_SIZE);
   }
 
-  trackBy(index: number, ii: number) {
-    return index;
-  }
+  onLazyRequestVlist = (request: DataSlice) => this.vlStream$.next({ ...request, items: this.vlData.slice(request.from, request.to) });
 
-  createDate(size: number) {
+  trackBy = (index: number, ii: number) => index;
+
+  createData = (size: number) => {
+    this.vlDelayedShow$.next(false);
     if (this.worker) {
       this.worker.postMessage(size);
     } else {
       this.vlData = toRange(size);
+      this.vlData$.next(this.vlData);
     }
   }
 }

@@ -1,3 +1,9 @@
+# 0.10.2
+
+### Fixed
+
+* **hidden element size:** tries to interval-recalculate item size when elements are technically visible but have no size yet due to 3rd party frameworks (e.g. when in a not currently shown tab)
+
 # 0.10.1
 
 ### Fixed

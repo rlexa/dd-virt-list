@@ -2,7 +2,7 @@
 
   <div [ngStyle]="{'display': 'flex', 'flex-direction': 'column'}">
     <button (click)="vlTrigger$.next()">RELOAD</button>
-    <button (click)="createDate(vlData.length === VL_SIZE ? VL_SIZE/2 : VL_SIZE)">RESIZE</button>
+    <button (click)="createData(vlData.length === VL_SIZE ? VL_SIZE/2 : VL_SIZE)">RESIZE</button>
     <label>{{ vlData.length }}</label>
   </div>
 
@@ -13,9 +13,15 @@
   </div>
 
   <div [ngStyle]="{'width': '100px', 'margin': '15px'}">
-    <dd-virt-list #vlLazy vlHeight="300px" vlBatchSize="10" [vlTrigger]="vlTrigger$" [vlCount]="vlData.length" [vlLazyStream]="vlStream$"
-      (vlLazyRequest)="onLazyRequestVlist($event)">
+    <dd-virt-list #vlLazy vlHeight="300px" vlBatchSize="10" [vlTrigger]="vlTrigger$" [vlCount]="vlData.length"
+      [vlLazyStream]="vlStream$" (vlLazyRequest)="onLazyRequestVlist($event)">
       <label *ngFor="let ii of vlLazy.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
+    </dd-virt-list>
+  </div>
+
+  <div [ngStyle]="{'width': '100px', 'margin': '15px'}" *ngIf="vlDelayedShow$ | async">
+    <dd-virt-list #vlSimpleDelayed vlHeight="300px" vlBatchSize="10" [vlTrigger]="vlTrigger$" [vlData]="vlData$ | async">
+      <label *ngFor="let ii of vlSimpleDelayed.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
     </dd-virt-list>
   </div>
 
