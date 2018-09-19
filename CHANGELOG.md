@@ -1,3 +1,9 @@
+# 0.10.3
+
+### Added
+
+* **debugMode:** adding vlDebugMode flag for logging some operations
+
 # 0.10.2
 
 ### Fixed

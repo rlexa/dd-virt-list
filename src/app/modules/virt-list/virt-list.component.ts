@@ -53,11 +53,14 @@ function getFromTo(currentBatchIndex: number, batchSize: number, factorCachePre:
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
+  static INSTANCE_COUNTER = 0;
+
   constructor(
     private readonly ngZone: NgZone,
     private readonly changeDetectorRef: ChangeDetectorRef,
   ) { }
 
+  private readonly INSTANCE_ID = ++VirtListComponent.INSTANCE_COUNTER;
   private readonly done$ = new DoneSubject();
   private readonly triggerCalcBatch$ = new Subject();
   private readonly triggerCalcPage$ = new Subject();
@@ -88,6 +91,8 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('scroller') private vcScroller: ElementRef;
   @ViewChild('container') private vcContainer: ElementRef;
+
+  @Input() vlDebugMode = false;
 
   @Input() set vlHeight(val: string) {
     val = val || 'auto';
@@ -180,6 +185,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.maxHeight$,
       this.paddingTop$,
     ].forEach(ii => ii.complete());
+    if (this.vlDebugMode) { this.log('destroyed'); }
   }
 
   @HostListener('window:resize') onWindowResize() {
@@ -187,10 +193,14 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnInit() {
+    if (this.vlDebugMode) { this.log('init'); }
+
     this.triggerCalcItemHeight$.pipe(debounceTime(100)).subscribe(() => {
       if (this.vcContainer.nativeElement.children.length > 1) {
+        if (this.vlDebugMode) { this.log('item height calculating'); }
         const newHeight = calcElementHeight(this.vcContainer.nativeElement.children.item(1));
         if (newHeight !== this.curItemHeight) {
+          if (this.vlDebugMode) { this.log(`item height change ${this.curItemHeight} => ${newHeight}`); }
           this.curItemHeight = newHeight;
           if (this.curItemHeight === 0) {
             interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$)).subscribe(_ => this.triggerCalcItemHeight$.next());
@@ -203,8 +213,10 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.triggerCalcContainerHeight$.subscribe(() => {
+      if (this.vlDebugMode) { this.log('container height calculating'); }
       const newHeight = toPixels(this.curItemHeight * this.curCount);
       if (newHeight !== this.containerHeight$.value || !this.curItemHeight && this.curCount) {
+        if (this.vlDebugMode) { this.log(`container height change ${this.containerHeight$.value} => ${newHeight}`); }
         this.containerHeight$.next(newHeight);
         this.triggerCalcBatch$.next();
       }
@@ -216,6 +228,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.triggerSetData$.subscribe(slice => {
       this.curShown = slice;
       this.items = this.curShown.items || [];
+      if (this.vlDebugMode) { this.log(`got data slice with ${this.items.length} item(s)`); }
       this.paddingTop$.next(toPixels((this.curShown.from || 0) * this.curItemHeight));
       this.triggerCalcItemHeight$.next();
       this.changeDetectorRef.markForCheck();
@@ -269,5 +282,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
+
+  private log = (val: string) => typeof val === 'string' && val.length ? console.log(`ddVirtList ${this.INSTANCE_ID}: ${val}`) : {};
 
 }

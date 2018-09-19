@@ -48,6 +48,7 @@ onLazy = (request: {from: number, to: number}) =>
 | vlCount | 0 | `number` Set to total count for lazy data. |
 | vlTrigger | null | `Observable` Can be used to trigger re-requesting data. |
 | vlLazyStream | null | `Observable<{from: number, to: number, items: any[]}>` Used as source of lazy data. |
+| vlDebugMode | false | `boolean` Logs some info when set to `true`. |
 
 | Emitter |  Info |
 | - | - |
