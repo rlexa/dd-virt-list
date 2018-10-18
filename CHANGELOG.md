@@ -1,16 +1,28 @@
-# 0.10.3
+# **1.0.0**
+
+### Fixed
+
+* **indefinite auto-scroll:** refactored content container to prevent indefinite auto-scrolling
+
+## 0.10.4
+
+### Fixed
+
+* **hidden element container size:** tries to interval-recalculate item and container size when elements are technically visible but have no size yet due to 3rd party frameworks (e.g. when in a not currently shown tab)
+
+## 0.10.3
 
 ### Added
 
 * **debugMode:** adding vlDebugMode flag for logging some operations
 
-# 0.10.2
+## 0.10.2
 
 ### Fixed
 
 * **hidden element size:** tries to interval-recalculate item size when elements are technically visible but have no size yet due to 3rd party frameworks (e.g. when in a not currently shown tab)
 
-# 0.10.1
+## 0.10.1
 
 ### Fixed
 
@@ -22,37 +34,37 @@
 
 * **@angular:** now aligned to @angular framework 6.0.0
 
-# 0.9.25
+## 0.9.25
 
 ### Changed
 
 * **vlBatchSize:** allow smaller values (min 5 now)
 
-# 0.9.24
+## 0.9.24
 
 ### Changed
 
 * **change detection:** more reactive internally (less manual change detection)
 
-# 0.9.23
+## 0.9.23
 
 ### Fixed
 
 * **change detection:** prevent manual change detection when destroyed
 
-# 0.9.21
+## 0.9.21
 
 ### Fixed
 
 * **vlHeight:** manual change detection on vlHeight change
 
-# 0.9.2
+## 0.9.2
 
 ### Performance
 
 * **manual change detection:** detached from angular change detection
 
-# 0.9.19
+## 0.9.19
 
 ### Fixed
 
@@ -64,20 +76,20 @@
 * **less relayouting:** caching scrollTop after scroll events to prevent more relayouting
 * **changing test array size:** array resize now done in worker (cleaner perf testing results)
 
-# 0.9.18
+## 0.9.18
 
 ### Fixed
 
 * **element height:** delay calculation a bit (should help with auto-wrapped flex content)
 * **window resize:** listens to window resize event and triggers element height calculation
 
-# 0.9.17
+## 0.9.17
 
 ### Performance
 
 * **initial load:** initial lazy loaded data should appear faster now
 
-# 0.9.15
+## 0.9.15
 
 ### Added
 

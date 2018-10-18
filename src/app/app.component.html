@@ -7,20 +7,20 @@
   </div>
 
   <div [ngStyle]="{'width': '100px', 'margin': '15px'}">
-    <dd-virt-list #vlSimple [vlDebugMode]="true" vlHeight="300px" vlBatchSize="10" [vlTrigger]="vlTrigger$" [vlData]="vlData">
+    <dd-virt-list #vlSimple [vlDebugMode]="true" vlHeight="300px" vlBatchSize="30" [vlTrigger]="vlTrigger$" [vlData]="vlData">
       <label *ngFor="let ii of vlSimple.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
     </dd-virt-list>
   </div>
 
   <div [ngStyle]="{'width': '100px', 'margin': '15px'}">
-    <dd-virt-list #vlLazy [vlDebugMode]="true" vlHeight="300px" vlBatchSize="10" [vlTrigger]="vlTrigger$" [vlCount]="vlData.length"
+    <dd-virt-list #vlLazy [vlDebugMode]="true" vlHeight="300px" vlBatchSize="30" [vlTrigger]="vlTrigger$" [vlCount]="vlData.length"
       [vlLazyStream]="vlStream$" (vlLazyRequest)="onLazyRequestVlist($event)">
       <label *ngFor="let ii of vlLazy.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
     </dd-virt-list>
   </div>
 
   <div [ngStyle]="{'width': '100px', 'margin': '15px'}" *ngIf="vlDelayedShow$ | async">
-    <dd-virt-list #vlSimpleDelayed [vlDebugMode]="true" vlHeight="300px" vlBatchSize="10" [vlTrigger]="vlTrigger$"
+    <dd-virt-list #vlSimpleDelayed [vlDebugMode]="true" vlHeight="300px" vlBatchSize="30" [vlTrigger]="vlTrigger$"
       [vlData]="vlData$ | async">
       <label *ngFor="let ii of vlSimpleDelayed.items; trackBy: trackBy;" [style.font-family]="'monospace'">{{ ii }}</label>
     </dd-virt-list>

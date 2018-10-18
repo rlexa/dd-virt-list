@@ -1,5 +1,5 @@
+import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { VirtListComponent } from './virt-list.component';
 
 describe('VirtListComponent', () => {
@@ -8,9 +8,9 @@ describe('VirtListComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ VirtListComponent ]
+      imports: [CommonModule], declarations: [VirtListComponent],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

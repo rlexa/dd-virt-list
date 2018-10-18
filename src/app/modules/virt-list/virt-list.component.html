@@ -1,7 +1,8 @@
 <div #scroller class="dd-virt-list-scroller" [style.maxHeight]="maxHeight$ | async">
-  <div *ngIf="containerHeight$ | async as containerHeight" #container class="dd-virt-list-container" [style.minHeight]="containerHeight"
+  <div *ngIf="containerHeight$ | async as containerHeight" class="dd-virt-list-container" [style.minHeight]="containerHeight"
     [style.height]="containerHeight" [style.maxHeight]="containerHeight">
-    <div class="dd-virt-list-offset" [style.paddingTop]="paddingTop$ | async"></div>
-    <ng-content></ng-content>
+    <div #content class="dd-virt-list-content" [style.top]="paddingTop$ | async">
+      <ng-content></ng-content>
+    </div>
   </div>
 </div>

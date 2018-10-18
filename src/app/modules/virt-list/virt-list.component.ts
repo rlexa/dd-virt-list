@@ -38,7 +38,7 @@ const toPixels = (value: number) => toUnit(value, 'px');
 
 function getFromTo(currentBatchIndex: number, batchSize: number, factorCachePre: number, factorCachePost: number) {
   let from = Math.floor((currentBatchIndex - factorCachePre) * batchSize);
-  let to = Math.ceil((currentBatchIndex + 1 + factorCachePost) * batchSize);
+  let to = Math.ceil(from + (factorCachePre + 1 + factorCachePost) * batchSize);
   if (from < 0) {
     to -= from;
     from = 0;
@@ -62,6 +62,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private readonly INSTANCE_ID = ++VirtListComponent.INSTANCE_COUNTER;
   private readonly done$ = new DoneSubject();
+  private readonly curScrollTop$ = new BehaviorSubject(0);
   private readonly triggerCalcBatch$ = new Subject();
   private readonly triggerCalcPage$ = new Subject();
   private readonly triggerCalcItemHeight$ = new Subject();
@@ -81,8 +82,6 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   private curShown: DataSlice = null;
   private curLazyRequest: DataSlice = null;
 
-  private curScrollTop = 0;
-
   readonly containerHeight$ = new BehaviorSubject(toPixels(0));
   readonly maxHeight$ = new BehaviorSubject('auto');
   readonly paddingTop$ = new BehaviorSubject(toPixels(0));
@@ -90,7 +89,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   items: any[] = [];
 
   @ViewChild('scroller') private vcScroller: ElementRef;
-  @ViewChild('container') private vcContainer: ElementRef;
+  @ViewChild('content') private vcContent: ElementRef;
 
   @Input() vlDebugMode = false;
 
@@ -142,7 +141,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.subsDoRequest = null;
     }
     if (value instanceof Observable) {
-      this.subsDoRequest = value.pipe(takeUntil(this.done$), debounceTime(0)).subscribe(() => {
+      this.subsDoRequest = value.pipe(debounceTime(0), takeUntil(this.done$)).subscribe(() => {
         this.curLazyRequest = null;
         this.curCache = null;
         this.curShown = null;
@@ -176,6 +175,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy() {
     this.done$.done();
     [
+      this.curScrollTop$,
       this.triggerCalcBatch$,
       this.triggerCalcPage$,
       this.triggerCalcItemHeight$,
@@ -196,18 +196,18 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.vlDebugMode) { this.log('init'); }
 
     this.triggerCalcItemHeight$.pipe(debounceTime(100)).subscribe(() => {
-      if (this.vcContainer.nativeElement.children.length > 1) {
+      if (this.vcContent.nativeElement.children.length > 1) {
         if (this.vlDebugMode) { this.log('item height calculating'); }
-        const newHeight = calcElementHeight(this.vcContainer.nativeElement.children.item(1));
+        const newHeight = calcElementHeight(this.vcContent.nativeElement.children.item(0));
+        if (newHeight === 0) {
+          // AR: we have an item but can't get size, let's try again (bad for performance but no way to tell when it will become visible otherwise)
+          interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$)).subscribe(_ => this.triggerCalcItemHeight$.next());
+        }
         if (newHeight !== this.curItemHeight) {
           if (this.vlDebugMode) { this.log(`item height change ${this.curItemHeight} => ${newHeight}`); }
           this.curItemHeight = newHeight;
-          if (this.curItemHeight === 0) {
-            interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$)).subscribe(_ => this.triggerCalcItemHeight$.next());
-          } else {
-            this.triggerCalcContainerHeight$.next();
-            this.triggerCalcBatch$.next();
-          }
+          this.triggerCalcContainerHeight$.next();
+          this.triggerCalcBatch$.next();
         }
       }
     });
@@ -229,30 +229,24 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.curShown = slice;
       this.items = this.curShown.items || [];
       if (this.vlDebugMode) { this.log(`got data slice with ${this.items.length} item(s)`); }
+      this.changeDetectorRef.markForCheck();
       this.paddingTop$.next(toPixels((this.curShown.from || 0) * this.curItemHeight));
       this.triggerCalcItemHeight$.next();
-      this.changeDetectorRef.markForCheck();
     });
+
+    this.curScrollTop$.pipe(debounceTime(MS_SCROLL_DEBOUNCE), takeUntil(this.done$)).subscribe(() => this.ngZone.run(() => this.triggerCalcBatch$.next()));
   }
 
   ngAfterViewInit() {
     this.ngZone.runOutsideAngular(() => {
       fromEvent(this.vcScroller.nativeElement, 'scroll')
-        .pipe(
-          takeUntil(this.done$),
-          debounceTime(MS_SCROLL_DEBOUNCE),
-          map(() => <number>(this.vcScroller.nativeElement.scrollTop || 0)))
-        .subscribe(scrollTop => this.ngZone.run(() => {
-          this.curScrollTop = scrollTop;
-          this.triggerCalcBatch$.next();
-        }));
+        .pipe(map((_: Event) => _.srcElement.scrollTop || 0), takeUntil(this.done$))
+        .subscribe(_ => this.curScrollTop$.next(_));
     });
-
-    this.triggerCalcBatch$.next();
   }
 
   private calcBatch = () => {
-    this.curBatchIndex = this.curItemHeight ? Math.round(this.curScrollTop / (this.curBatchSize * this.curItemHeight)) : 0;
+    this.curBatchIndex = this.curItemHeight ? Math.round(this.curScrollTop$.value / (this.curBatchSize * this.curItemHeight)) : 0;
     this.triggerCalcPage$.next();
   }
 

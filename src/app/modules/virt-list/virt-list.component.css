@@ -1,16 +1,15 @@
 .dd-virt-list-scroller {
-    overflow-y: scroll;
-    will-change: scroll-position, transform;
+  overflow-y: scroll;
+  will-change: scroll-position, transform;
 }
 
 .dd-virt-list-container {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    will-change: content;
+  overflow: hidden;
+  will-change: content;
 }
 
-.dd-virt-list-offset {
-    max-height: 0px;
+.dd-virt-list-content {
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
