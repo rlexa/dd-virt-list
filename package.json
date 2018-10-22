@@ -5,7 +5,7 @@
     "npm publish dist": "publish to npm"
   },
   "name": "dd-virt-list",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "scripts": {
     "ng": "ng",
@@ -18,13 +18,13 @@
   },
   "private": false,
   "peerDependencies": {
-    "@angular/common": "^6.0.0",
-    "@angular/compiler": "^6.0.0",
-    "@angular/core": "^6.0.0",
-    "@angular/platform-browser": "^6.0.0",
-    "@angular/platform-browser-dynamic": "^6.0.0",
+    "@angular/common": ">=6.x",
+    "@angular/compiler": ">=6.x",
+    "@angular/core": ">=6.x",
+    "@angular/platform-browser": ">=6.x",
+    "@angular/platform-browser-dynamic": ">=6.x",
     "core-js": "^2.4.1",
-    "rxjs": "^6.0.0",
+    "rxjs": ">=6.x",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {

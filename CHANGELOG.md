@@ -1,3 +1,9 @@
+## 1.0.1
+
+### Compatibility
+
+* **dependencies:** updated angular semvers to accomodate for 7
+
 # **1.0.0**
 
 ### Fixed
