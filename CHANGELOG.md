@@ -1,3 +1,9 @@
+## 1.0.2
+
+### Fixed
+
+* **package:** revert to earlier ng-packagr
+
 ## 1.0.1
 
 ### Compatibility
