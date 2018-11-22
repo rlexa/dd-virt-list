@@ -196,7 +196,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.vlDebugMode) { this.log('init'); }
 
     this.triggerCalcItemHeight$.pipe(debounceTime(100)).subscribe(() => {
-      if (this.vcContent.nativeElement.children.length > 1) {
+      if (this.vcContent.nativeElement.children.length) {
         if (this.vlDebugMode) { this.log('item height calculating'); }
         const newHeight = calcElementHeight(this.vcContent.nativeElement.children.item(0));
         if (newHeight === 0) {

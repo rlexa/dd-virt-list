@@ -1,3 +1,9 @@
+## 1.0.3
+
+### Fixed
+
+* **item size:** now correctly calculates item size if there is at least one item
+
 ## 1.0.2
 
 ### Fixed
