@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { BehaviorSubject, fromEvent, interval, Observable, Subject, Subscription } from 'rxjs';
-import { auditTime, debounceTime, map, takeUntil } from 'rxjs/operators';
+import { debounceTime, map, takeUntil } from 'rxjs/operators';
 
 export interface DataSlice {
   from: number;
@@ -234,7 +234,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.triggerCalcItemHeight$.next();
     });
 
-    this.curScrollTop$.pipe(auditTime(MS_SCROLL_DEBOUNCE), takeUntil(this.done$)).subscribe(() => this.ngZone.run(() => this.triggerCalcBatch$.next()));
+    this.curScrollTop$.pipe(debounceTime(MS_SCROLL_DEBOUNCE), takeUntil(this.done$)).subscribe(() => this.ngZone.run(() => this.triggerCalcBatch$.next()));
   }
 
   ngAfterViewInit() {

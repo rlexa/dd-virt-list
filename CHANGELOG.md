@@ -1,3 +1,9 @@
+## 1.0.5
+
+### Performance
+
+* **scrolling:** rollback to debounceTime on scrolling (was actually worse performance with complex content)
+
 ## 1.0.4
 
 ### Fixed
