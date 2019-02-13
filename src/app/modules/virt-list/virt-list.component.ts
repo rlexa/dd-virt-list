@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { BehaviorSubject, fromEvent, interval, Observable, Subject, Subscription } from 'rxjs';
-import { debounceTime, map, takeUntil } from 'rxjs/operators';
+import { auditTime, debounceTime, map, takeUntil } from 'rxjs/operators';
 
 export interface DataSlice {
   from: number;
@@ -201,7 +201,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
         const newHeight = calcElementHeight(this.vcContent.nativeElement.children.item(0));
         if (newHeight === 0) {
           // AR: we have an item but can't get size, let's try again (bad for performance but no way to tell when it will become visible otherwise)
-          interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$)).subscribe(_ => this.triggerCalcItemHeight$.next());
+          interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$), takeUntil(this.done$)).subscribe(_ => this.triggerCalcItemHeight$.next());
         }
         if (newHeight !== this.curItemHeight) {
           if (this.vlDebugMode) { this.log(`item height change ${this.curItemHeight} => ${newHeight}`); }
@@ -234,7 +234,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
       this.triggerCalcItemHeight$.next();
     });
 
-    this.curScrollTop$.pipe(debounceTime(MS_SCROLL_DEBOUNCE), takeUntil(this.done$)).subscribe(() => this.ngZone.run(() => this.triggerCalcBatch$.next()));
+    this.curScrollTop$.pipe(auditTime(MS_SCROLL_DEBOUNCE), takeUntil(this.done$)).subscribe(() => this.ngZone.run(() => this.triggerCalcBatch$.next()));
   }
 
   ngAfterViewInit() {

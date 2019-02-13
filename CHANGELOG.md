@@ -1,3 +1,13 @@
+## 1.0.4
+
+### Fixed
+
+* **cleanup:** cancels delayed recalc of item height if component is destroyed
+
+### Performance
+
+* **scrolling:** moved to auditTime instead of debounceTime for faster data requests on scrolling
+
 ## 1.0.3
 
 ### Fixed
