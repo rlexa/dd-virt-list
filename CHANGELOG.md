@@ -1,3 +1,9 @@
+## 1.1.0
+
+### Added
+
+* **vlChildrenPerRow:** if vlChildrenPerRow is bigger than 0 (default) then the content is expected to be a container of items itself
+
 ## 1.0.5
 
 ### Performance

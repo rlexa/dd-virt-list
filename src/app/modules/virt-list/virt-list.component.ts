@@ -82,6 +82,7 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   private curShown: DataSlice = null;
   private curLazyRequest: DataSlice = null;
 
+  private childrenPerRow = 0;
   readonly containerHeight$ = new BehaviorSubject(toPixels(0));
   readonly maxHeight$ = new BehaviorSubject('auto');
   readonly paddingTop$ = new BehaviorSubject(toPixels(0));
@@ -92,6 +93,14 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('content') private vcContent: ElementRef;
 
   @Input() vlDebugMode = false;
+
+  @Input() set vlChildrenPerRow(val: number) {
+    val = Math.max(+val, 0);
+    if (this.childrenPerRow !== val) {
+      this.childrenPerRow = val;
+      this.triggerCalcItemHeight$.next();
+    }
+  }
 
   @Input() set vlHeight(val: string) {
     val = val || 'auto';
@@ -198,7 +207,9 @@ export class VirtListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.triggerCalcItemHeight$.pipe(debounceTime(100)).subscribe(() => {
       if (this.vcContent.nativeElement.children.length) {
         if (this.vlDebugMode) { this.log('item height calculating'); }
-        const newHeight = calcElementHeight(this.vcContent.nativeElement.children.item(0));
+        const firstElement = this.vcContent.nativeElement.children.item(0);
+        const heightFirstElement = calcElementHeight(firstElement);
+        const newHeight = this.childrenPerRow <= 0 ? heightFirstElement : heightFirstElement * this.childrenPerRow / firstElement.children.length;
         if (newHeight === 0) {
           // AR: we have an item but can't get size, let's try again (bad for performance but no way to tell when it will become visible otherwise)
           interval(1000).pipe(takeUntil(this.triggerCalcItemHeight$), takeUntil(this.done$)).subscribe(_ => this.triggerCalcItemHeight$.next());

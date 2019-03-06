@@ -44,6 +44,7 @@ onLazy = (request: {from: number, to: number}) =>
 | - | - | - |
 | vlBatchSize | 30 | `number` Batch size hint used for page size calculation (min. 10). |
 | vlHeight | 'auto' | `string` Height of the scrolling container (expects any valid CSS height). |
+| vlChildrenPerRow | 0 | `number` If bigger than 0 then the content is expected to be a container of the actual list items (instead of being the list of items otherwise). |
 | vlData | null | `any[]` For non-lazy data representation (auto-sets vlCount). |
 | vlCount | 0 | `number` Set to total count for lazy data. |
 | vlTrigger | null | `Observable` Can be used to trigger re-requesting data. |
